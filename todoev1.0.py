@@ -1,16 +1,48 @@
 import datetime
 from time import sleep
 from tqdm import tqdm
-
+import random
+import pyfiglet
+import os
 today = datetime.date.today()
+
+
+class Gamemodes:
+  def __init__(self, name, modes):
+        self.name = name       # Sets the name of the game
+        self.modes = modes     # Sets the modes for the game
+   
+  def display_modes(self):
+      print(f"Available modes for {self.name}: {', '.join(self.modes)}")
 
 positives = ["yeah", "yes", "shut down", "y"]
 negatives = ["no", "nope", "nah", "n", "no way jose"]
 close_out = ("close", "exit", "quit")
 
-def backhome():
+gamesmodes = [
+    ("tic tac toe", ["solo", "vs"]),
+    ("mine sweeper", ["solo", "vs"]),
+    ("chess", ["solo", "vs"]),
+    ("dice", ["solo", "vs"]),
+]
+
+def tic_tac_toe(mode):
+  print("tic tac toe not done yet")
+  backhome()
+
+def mine_sweeper(mode):
+  print("mine sweeper not done yet")
+  backhome()
+
+def chess(mode):
+  print("chess not done yet")
+  backhome()
+
+def backhome(mode):
   print("back to menu")
   menu()
+
+
 
 def menu():
   print(f"Today is {today}")
@@ -25,28 +57,99 @@ def menu():
     #file_cleaner()
   if task == "4":
     games()
+  if task not in ["1", "2", "3", "4"]:
+    print("invalid input try again")
+    menu()
+  elif task in close_out:
+    print("bye")
+    exit()
 
 def games():
-  pick_a_game = input("\nwhat do you wanna play \n 1)tic tac toe \n 2) mine sweeper \n 3) chess    \n").lower()
-  gamepicked = {
-      "tic tac toe": ["solo", "vs"],
-      "mine sweeper": ["solo", "vs"],
-      "chess": ["solo", "vs"]
-}
-  if pick_a_game in gamepicked:
-      mode = input(f"\n You picked {pick_a_game}\n are you playing solo or vs mode").lower()
-      if mode in gamepicked[pick_a_game]:
-        print(f" opening {pick_a_game} in {mode} mode")
-        for i in tqdm(range(10)):#sim loading
-          sleep(2)
-        print(f"\n {pick_a_game} is ready enjoy")
-  if pick_a_game in close_out:
-    backhome()
-  else:
-    print(f"\n {pick_a_game} was not a choice")
-    games()
+  pick_a_game = input("\nwhat do you wanna play \n 1)tic tac toe \n 2) mine sweeper \n 3) chess \n 4)dice    \n").lower().strip()
+  gamesmade = {
+        "1": tic_tac_toe,
+        "tic tac toe": tic_tac_toe,
+        "2": mine_sweeper,
+        "mine sweeper": mine_sweeper,
+        "3": chess,
+        "chess": chess,
+        "4": dice,
+        "dice": dice,
+    }
 
+  if pick_a_game not in gamesmade:
+    match pick_a_game:
+      case _ if pick_a_game in close_out:
+        menu()
+      case _:
+        print(f"\n'{pick_a_game}' was not a choice.")
+        games()  # Restart game selection
+        
 
+  mode = input(f"\n You picked {pick_a_game}\n are you playing solo or vs mode\n").lower()
+
+  valid_modes = {mode for _, modes in gamesmodes for mode in modes}
+
+  if mode not in valid_modes:
+        print(f"\n'{mode}' is not a valid mode.")
+        games()  # Restart game selection
+        return
+
+  print(f"\nOpening {pick_a_game} in {mode} mode...")
+  for i in tqdm(range(10)):  # sim loading
+      sleep(0.5)
+      print(f"\n {pick_a_game} in {mode} is ready enjoy")
+      gamesmade[pick_a_game](mode)
+
+def dice_roll(num_dice):
+   whaturolled = [random.randint(1,8) for i in range(num_dice)]
+   return whaturolled
+
+def dice(mode):
+  print("\n RULES \n 7 is a insta win 2,4,8 mean you lose else roll again")
+  num_dice = int(input("\n how many dice do u want \n"))
+  if num_dice < 1:
+    print("\n invalid input must be at least 1")
+    dice(mode)
+  try:
+    match mode:
+      case "solo":
+        dice_rolled = dice_roll(num_dice)
+        print(f"you rolled {dice_rolled}")
+        if 7 in dice_rolled:
+          winnertext = pyfiglet.figlet_format(f"\n 7 7 7 7 7 \n you won with a 7 \n 7 7 7 7 7")
+          print(winnertext)
+        if any(x in dice_rolled for x in [2, 4, 8]):
+          losertext = pyfiglet.figlet_format(f"you lost you rolled {dice_rolled}")
+          print(losertext)
+        else:
+          reroll = input(f"\n close you rolled {dice_rolled} Wanna roll again")
+          if reroll in positives:
+            dice("solo")
+          if reroll in negatives:
+            games()
+          if reroll in close_out:
+            menu()
+          else:
+            print("invalid")
+            games  
+
+      case "vs":
+        print("\n vs mode not done yet")
+        backhome()
+
+      case _:  
+        badpull = input(f"you input gid something wrong \n 1) back to games list \n 2) back to menu \n 3) back to dice {mode} mode ") 
+        if badpull == "1":
+          games()
+        if badpull == "2":
+          menu()
+        if badpull == "3":
+          dice(mode)
+
+  except ValueError:
+      print("invalid input")
+      dice(mode)
 
 def choice():
     todos = {}
@@ -111,3 +214,4 @@ def choice():
 
 
 menu()
+
