@@ -15,18 +15,91 @@ class Gamemodes:
   def __init__(self, name, modes):
         self.name = name       # Sets the name of the game
         self.modes = modes     # Sets the modes for the game
-   
+
   def display_modes(self):
       print(f"Available modes for {self.name}: {', '.join(self.modes)}")
 
 positives = ["yeah", "yes", "shut down", "y"]
 negatives = ["no", "nope", "nah", "n", "no way jose"]
-close_out = ("close", "exit", "quit")
+close_out = ("close", "exit", "quit", "bye")
 
 
 def tic_tac_toe(mode):
-  print("tic tac toe not done yet")
-  backhome()
+    print(pyfiglet.figlet_format("Tic Tac Toe"))
+
+    board = [" " for _ in range(9)]
+    players = ["X", "O"]
+    
+    def print_board():
+        for i in range(0, 9, 3):
+            print(" | ".join(board[i:i+3]))
+            if i < 6:
+                print("-" * 9)
+
+    def check_winner():
+        for i in range(0, 9, 3):  # Rows
+            if board[i] == board[i+1] == board[i+2] != " ":
+                return board[i]
+        for i in range(3):  # Columns
+            if board[i] == board[i+3] == board[i+6] != " ":
+                return board[i]
+        if board[0] == board[4] == board[8] != " ":  # Diagonal 1
+            return board[0]
+        if board[2] == board[4] == board[6] != " ":  # Diagonal 2
+            return board[2]
+        if " " not in board:
+            return "tie"
+        return None
+
+    def bot_move():
+        available = [i for i in range(9) if board[i] == " "]
+        move = random.choice(available)
+        board[move] = "O"
+
+    match mode:
+        case "solo":
+            xoro = input("Do you want to be X or O? ").strip().lower()
+            if xoro not in ["x", "o"]:
+                print("Invalid choice.")
+                return
+
+            human = xoro.upper()
+            bot = "O" if human == "X" else "X"
+
+            print(f"You're {human}, the bot is {bot}")
+            print_board()
+
+            for turn in range(9):
+                if (turn % 2 == 0 and human == "X") or (turn % 2 == 1 and human == "O"):
+                    while True:
+                        try:
+                            move = int(input("Enter your move (1-9): ")) - 1
+                            if 0 <= move < 9 and board[move] == " ":
+                                board[move] = human
+                                break
+                            print("Invalid move. Try again.")
+                        except ValueError:
+                            print("Enter a number between 1 and 9.")
+                else:
+                    print("Bot's turn...")
+                    bot_move()
+
+                print_board()
+                winner = check_winner()
+                if winner:
+                    if winner == "tie":
+                        print("It's a tie!")
+                    elif winner == human:
+                        print(pyfiglet.figlet_format("\n Winner \n"))
+                    else:
+                        print("Bot wins!")
+                    return
+
+        case "vs":
+            print("\nMultiplayer mode is not implemented yet.")
+        case _:
+            print("\nInvalid input")
+
 
 def mine_sweeper(mode):
   print("mine sweeper not done yet")
@@ -66,7 +139,7 @@ def menu():
       print("bye")
       exit()
     else:
-      print("invalid input try again")     
+      print("invalid input try again")
 
 
 def games():
@@ -80,7 +153,7 @@ def games():
   if pick_a_game in close_out:
     print("bye")
     exit()
-  
+
   elif pick_a_game not in gamesandmodes:
     print(" no you must pick a game")
     return games()
@@ -114,7 +187,7 @@ def dice(mode):
       return dice(mode)
   except ValueError:
     print("\n invalid input must be a number")
-    
+
     return dice(mode)
 
   match mode:
@@ -128,7 +201,7 @@ def dice(mode):
           losertext = pyfiglet.figlet_format(f"you lost you rolled {dice_rolled}")
           print(losertext)
           return keep_playing(False, dice, mode)
-        else:        
+        else:
           reroll = input(f"\n close you rolled {dice_rolled} Wanna roll again").lower().strip()
           if reroll in positives:
             keep_playing(True, dice, mode)
@@ -137,14 +210,14 @@ def dice(mode):
             keep_playing(False, dice, mode)
           else:
             print("invalid")
-            games()  
+            games()
 
       case "vs":
         print("\n vs mode not done yet")
         backhome()
 
-      case _:  
-        badpull = input(f"you input gid something wrong \n 1) back to games list \n 2) back to menu \n 3) back to dice {mode} mode ") 
+      case _:
+        badpull = input(f"you input gid something wrong \n 1) back to games list \n 2) back to menu \n 3) back to dice {mode} mode ")
         if badpull == "1":
           games()
         if badpull == "2":
@@ -206,15 +279,19 @@ def choice():
                     print(f"\n {del_event} deleted")
                     del todos[del_event]
                     return menu()
-                  
+
                   elif com_del in negatives:
                     print("\n canceled")
                     menu()
-                  
+
                   else:
                     print("\n canceled")
                     menu()
 
+            case _ if pick in close_out:
+                print("\n bye")
+                break
+                break
 
             case _:
                 print("\n invalid choice")
